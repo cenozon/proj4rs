@@ -213,7 +213,7 @@ pub extern "C" fn proj4rs_transform(
             to_radians(x, y, len, stride);
         }
     }
-    
+
     if let Err(err) = transform(&src.inner, &dst.inner, &mut Coords(x, y, z, len, stride)) {
         set_last_error(err);
         ERR

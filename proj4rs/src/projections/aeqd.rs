@@ -379,14 +379,14 @@ impl AeqdE {
         Ok(if lam.abs() < EPS_10 && (phi - self.phi0).abs() < EPS_10 {
             (0., 0., z)
         } else {
-            let (s12, mut azi1, _) = self.g.inverse(
+            let ir = self.g.inverse(
                 self.phi0.to_degrees(), // lat1
                 0.,                     // lon1
                 phi.to_degrees(),       // lat2
                 lam.to_degrees(),       // lon2
             );
-            azi1 = azi1.to_radians();
-            (s12 * azi1.sin(), s12 * azi1.cos(), z)
+            let azi1 = ir.azi1.to_radians();
+            (ir.s12 * azi1.sin(), ir.s12 * azi1.cos(), z)
         })
     }
 
@@ -395,13 +395,13 @@ impl AeqdE {
         Ok(if s12 < EPS_10 {
             (0., self.phi0, z)
         } else {
-            let (phi, lam, _) = self.g.direct(
+            let dr = self.g.direct(
                 self.phi0.to_degrees(),  // lat1
                 0.,                      // lon1
                 x.atan2(y).to_degrees(), // az1, clockwise from north
                 s12,
             );
-            (lam.to_radians(), phi.to_radians(), z)
+            (dr.lon2.to_radians(), dr.lat2.to_radians(), z)
         })
     }
 }

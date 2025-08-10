@@ -13,6 +13,10 @@ categories.workspace = true
 
 [dependencies]
 
-[build-dependencies]
-cc = "1.0"
+#[build-dependencies]
+# (none)
 
+[features]
+default = []
+full-calc = []
+cached-wgs84 = []
