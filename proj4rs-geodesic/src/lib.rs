@@ -130,7 +130,7 @@ const C3_COEFF: [f64; 45] = [
 
 #[cfg(feature = "full-calc")]
 #[rustfmt::skip]
-const C4_COEFF: [f64; 75] = [
+const C4_COEFF: [f64; 77] = [
     97.0, 15015.0, 1088.0, 156.0, 45045.0,
     -224.0, -4784.0, 1573.0, 45045.0,
     -10656.0, 14144.0, -4576.0, -858.0, 45045.0,
@@ -205,12 +205,9 @@ fn polyvalx(n: isize, p: &[f64], x: f64) -> f64 {
     let mut y = if n < 0 { 0.0 } else { p[0] };
     let mut i = 1usize;
     let mut n = n;
-    while {
-        n -= 1;
-        n
-    } >= 0
-    {
-        y = y.mul_add(x, p[i]);
+    while { n -= 1; n } >= 0 {
+        // Avoid fused multiply-add to mirror C rounding behavior
+        y = y * x + p[i];
         i += 1;
     }
     y
@@ -300,7 +297,8 @@ fn remquo90(x: f64) -> (f64, i32) {
 fn sincosdx(x: f64) -> (f64, f64) {
     let (r0, q) = remquo90(x);
     let r = r0 * DEGREE; // radians
-    let (s, c) = r.sin_cos();
+    let s = r.sin();
+    let c = r.cos();
     let (mut so, mut co) = match (q as u32) & 3 {
         0 => (s, c),
         1 => (c, -s),
@@ -319,7 +317,8 @@ fn sincosdx(x: f64) -> (f64, f64) {
 fn sincosde(x: f64, t: f64) -> (f64, f64) {
     let (r0, q) = remquo90(x);
     let r = ang_round(r0 + t) * DEGREE;
-    let (s, c) = r.sin_cos();
+    let s = r.sin();
+    let c = r.cos();
     let (mut so, mut co) = match (q as u32) & 3 {
         0 => (s, c),
         1 => (c, -s),
@@ -1043,7 +1042,7 @@ impl Geodesic {
         let dn1 = (1.0 + self.ep2 * sq(sbet1)).sqrt();
         let dn2 = (1.0 + self.ep2 * sq(sbet2)).sqrt();
 
-        let meridian = lat1 == -QD || slam12 == 0.0;
+        let mut meridian = lat1 == -QD || slam12 == 0.0;
         let mut s12x = 0.0;
         let mut salp1 = 0.0;
         let mut calp1 = 0.0;
@@ -1089,6 +1088,9 @@ impl Geodesic {
                     s12x = 0.0;
                 }
                 s12x *= self.b;
+            } else {
+                // m12 < 0, i.e., prolate and too close to antipodal; fall back
+                meridian = false;
             }
         }
         if !meridian && sbet1 == 0.0 && (self.f <= 0.0 || lon12s >= self.f * HD) {
