@@ -206,8 +206,7 @@ fn polyvalx(n: isize, p: &[f64], x: f64) -> f64 {
     let mut i = 1usize;
     let mut n = n;
     while { n -= 1; n } >= 0 {
-        // Avoid fused multiply-add to mirror C rounding behavior
-        y = y * x + p[i];
+        y = y.mul_add(x, p[i]);
         i += 1;
     }
     y
@@ -297,8 +296,7 @@ fn remquo90(x: f64) -> (f64, i32) {
 fn sincosdx(x: f64) -> (f64, f64) {
     let (r0, q) = remquo90(x);
     let r = r0 * DEGREE; // radians
-    let s = r.sin();
-    let c = r.cos();
+    let (s, c) = r.sin_cos();
     let (mut so, mut co) = match (q as u32) & 3 {
         0 => (s, c),
         1 => (c, -s),

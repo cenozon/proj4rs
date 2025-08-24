@@ -11,11 +11,6 @@ homepage.workspace = true
 repository.workspace = true
 categories.workspace = true
 
-[dependencies]
-
-#[build-dependencies]
-# (none)
-
 [features]
 default = []
 full-calc = []

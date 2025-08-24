@@ -144,7 +144,6 @@ mod tests {
             ),
         ];
 
-        // Slightly relax tolerance due to numerical differences in logs/atan
         test_proj_forward(&p, &inputs, EPS_10);
         test_proj_inverse(&p, &inputs, EPS_10);
     }
