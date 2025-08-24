@@ -14,4 +14,3 @@ categories.workspace = true
 [features]
 default = []
 full-calc = []
-cached-wgs84 = []
