@@ -1,6 +1,6 @@
-// Unit tests ported alongside the implementation to ensure numerical parity.
 use crate::Geodesic;
 
+#[inline(always)]
 fn approx(a: f64, b: f64, tol: f64) -> bool {
     (a - b).abs() <= tol
 }
@@ -10,8 +10,7 @@ fn approx_ang(a: f64, b: f64) -> bool {
 }
 
 fn approx_m(a: f64, b: f64) -> bool {
-    // Functional parity: allow 1 mm absolute tolerance
-    approx(a, b, 1e-3)
+    approx(a, b, 1e-8)
 }
 
 #[test]
@@ -409,27 +408,33 @@ fn dist_az_test() {
             104679964020340.318,
         ]),
     ];
-    let g = crate::Geodesic::wgs84();
+    let g = Geodesic::wgs84();
     for (i, t) in testcases.iter().enumerate() {
         let ir = g.inverse(t.lat1, t.lon1, t.lat2, t.lon2);
-        if (ir.s12 - t.s12).abs() >= 1e-8
-            || (ir.azi1 - t.azi1).abs() >= 1e-13
-            || (ir.azi2 - t.azi2).abs() >= 1e-13
-        {
-            panic!(
-                "case {} mismatch: s={} exp={} Δs={}; azi1={} exp={} Δ1={}; azi2={} exp={} Δ2={}",
-                i,
-                ir.s12,
-                t.s12,
-                ir.s12 - t.s12,
-                ir.azi1,
-                t.azi1,
-                ir.azi1 - t.azi1,
-                ir.azi2,
-                t.azi2,
-                ir.azi2 - t.azi2
-            );
-        }
+        assert!(
+            (ir.s12 - t.s12).abs() < 1e-8,
+            "case {} mismatch: s={} exp={} Δs={}",
+            i,
+            ir.s12,
+            t.s12,
+            ir.s12 - t.s12
+        );
+        assert!(
+            (ir.azi1 - t.azi1).abs() < 1e-13,
+            "case {} mismatch: azi1={} exp={} Δ1={}",
+            i,
+            ir.azi1,
+            t.azi1,
+            ir.azi1 - t.azi1
+        );
+        assert!(
+            (ir.azi2 - t.azi2).abs() < 1e-13,
+            "case {} mismatch: azi2={} exp={} Δ2={}",
+            i,
+            ir.azi2,
+            t.azi2,
+            ir.azi2 - t.azi2
+        );
     }
     let ir = g.inverse(0.0, 0.0, 0.0, 10.0);
     let s0 = 1113194.9079327357;

@@ -9,9 +9,9 @@ use std::fmt::{Debug, Display};
 use crate::algorithms::{inverse_start, lambda12, lengths};
 use crate::constants::*;
 use crate::math::{ang_diff, ang_round, atan2dx, lat_fix, norm2, sincosde, sincosdx, sq};
-use crate::series::{a3coeff, c3coeff};
 #[cfg(feature = "full-calc")]
 use crate::series::c4coeff;
+use crate::series::{a3coeff, c3coeff};
 
 /// Result of a direct geodesic computation.
 ///
@@ -193,17 +193,11 @@ impl Geodesic {
     /// Given a start point `(lat1, lon1)` in degrees, a forward azimuth `azi1`
     /// in degrees, and a distance `s12` in meters, returns the destination point
     /// and forward azimuth at destination.
-    pub fn direct(
-        &self,
-        lat1: f64,
-        lon1: f64,
-        azi1: f64,
-        s12: f64,
-    ) -> crate::geodesic::DirectResult {
+    pub fn direct(&self, lat1: f64, lon1: f64, azi1: f64, s12: f64) -> DirectResult {
         let line = self.line(lat1, lon1, azi1);
         line.position_distance(s12)
     }
-    
+
     // Internal helpers: a minimal port of geninverse used by API
     fn geninverse(&self, lat1: f64, lon1: f64, lat2: f64, lon2: f64) -> (f64, f64, f64) {
         let (mut lon12, mut lon12s) = ang_diff(lon1, lon2);

@@ -1,13 +1,12 @@
 //! Geodesic line with precomputed state for repeated direct evaluations.
+#[cfg(feature = "full-calc")]
+use crate::algorithms::lengths;
 use crate::constants::*;
 use crate::geodesic::{DirectResult, Geodesic};
 use crate::math::{ang_normalize, ang_round, atan2dx, lat_fix, norm2, sincosdx, sq};
-use crate::series::{a3f, c1f, c1pf, c3f, sin_cos_series_const};
-#[cfg(feature = "full-calc")]
-use crate::algorithms::lengths;
 #[cfg(feature = "full-calc")]
 use crate::series::c4f;
-
+use crate::series::{a1m1f, a3f, c1f, c1pf, c3f, sin_cos_series_const};
 
 /// A line on the ellipsoid defined by a start point and azimuth.
 ///
@@ -75,9 +74,7 @@ impl<'a> GeodesicLine<'a> {
                 * (sig12
                     + (sin_cos_series_const::<N_C3M1>(true, ssig2, csig2, &self.c3a)
                         - sin_cos_series_const::<N_C3M1>(true, self.ssig1, self.csig1, &self.c3a)));
-        let lon2 = crate::math::ang_normalize(
-            crate::math::ang_normalize(self.lon1) + crate::math::ang_normalize(lam12 / DEGREE),
-        );
+        let lon2 = ang_normalize(ang_normalize(self.lon1) + ang_normalize(lam12 / DEGREE));
         let azi2 = atan2dx(salp2, calp2);
         #[cfg(feature = "full-calc")]
         {
@@ -170,7 +167,7 @@ impl Geodesic {
         norm2(&mut ssig1, &mut csig1);
         let k2 = sq(calp0) * self.ep2;
         let eps = k2 / (2.0 * (1.0 + (1.0 + k2).sqrt()) + k2);
-        let a1m1 = crate::series::a1m1f(eps);
+        let a1m1 = a1m1f(eps);
         let mut c1a = [0.0f64; N_C];
         c1f(eps, &mut c1a);
         let b11 = sin_cos_series_const::<N_C1>(true, ssig1, csig1, &c1a);
