@@ -1,0 +1,18 @@
+[package]
+name = "proj4rs-geozero"
+version = "0.1.0"
+edition = "2021"
+description = "Streaming coordinate reprojection adaptor between proj4rs and geozero"
+keywords.workspace = true
+authors.workspace = true
+license.workspace = true
+homepage.workspace = true
+repository.workspace = true
+categories.workspace = true
+
+[dependencies]
+proj4rs = { path = "../proj4rs", default-features = false, features = ["multi-thread"] }
+geozero = { version = "0.14.0", default-features = false }
+
+[dev-dependencies]
+geozero = { version = "0.14.0", default-features = false, features = ["with-wkb"] }
